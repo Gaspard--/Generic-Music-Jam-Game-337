@@ -10,6 +10,7 @@
 # include "RenderContext.hpp"
 # include "Bind.hpp"
 # include "Rect.hpp"
+# include "Renderable.hpp"
 
 # include <iostream> /* DEBUG */
 
@@ -49,6 +50,8 @@ class Display : GlfwInit
 	RenderContext textureContext;
 	glBuffer textureBuffer;
 
+	Texture bg;
+
 	Vect<2, float> dim;
 	Vect<2, float> size;
 
@@ -70,8 +73,9 @@ public:
 				}
 				return (window);
 			}())
-		, rectContext(contextFromFiles("rect"))
-		, textureContext(contextFromFiles("texture"))
+		, rectContext{contextFromFiles("rect")}
+		, textureContext{contextFromFiles("texture")}
+		, bg{my_opengl::loadTexture("resources/texture/bg.bmp")}
 	{
 		static auto setFrameBuffer = [this] (float w, float h) {
 			size = { w, h };
@@ -91,6 +95,16 @@ public:
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
 		}
+		{
+			Bind<RenderContext> bind(textureContext);
+
+			glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
+			glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(float), nullptr);
+			glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * sizeof(float), reinterpret_cast<void *>(2u * sizeof(float)));
+		}
 	}
 
 	~Display()
@@ -105,8 +119,14 @@ public:
 
 		/* Debug */
 		{
-			Rect const r{{-0.5f, -0.5f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}};
-			displayRect(r);
+			Renderable r = {
+				bg,
+				{0.0f, 0.0f},
+				{1.0f, 1.0f},
+				{-0.5f, -0.5f},
+				{1.0f, 1.0f}
+			};
+			displayRenderable(r);
 		}
 
 		glDisable(GL_BLEND);
@@ -128,6 +148,28 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, rectBuffer);
 		my_opengl::setUniform(dim, "dim", rectContext.program);
 		my_opengl::setUniform(rect.color, "rect_color", rectContext.program);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_STATIC_DRAW);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+
+	void displayRenderable(Renderable const &r) {
+		Bind<RenderContext> bind(textureContext);
+		float buffer[4u * 4u];
+
+		for (unsigned int i{0u}; i != 4u; ++i) {
+			Vect<2u, float> const corner{static_cast<float>(i & 1u), static_cast<float>(i >> 1u)};
+			Vect<2u, float> const sourceCorner{corner * r.sourceSize + r.sourcePos};
+			Vect<2u, float> const destCorner{corner * r.destSize + r.destPos};
+
+			std::copy(&sourceCorner[0], &sourceCorner[2u], &buffer[i * 4u]);
+			std::copy(&destCorner[0], &destCorner[2u], &buffer[i * 4u + 2u]);
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, r.texture);
+		glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
+		my_opengl::setUniform(dim, "dim", textureContext.program);
+		my_opengl::setUniform(0u, "tex", textureContext.program);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_STATIC_DRAW);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
