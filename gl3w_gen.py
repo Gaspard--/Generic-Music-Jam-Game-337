@@ -25,8 +25,6 @@
 #   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #   OTHER DEALINGS IN THE SOFTWARE.
 
-# Note: slightly changed by kellen_j (src -> source / include/GL -> include)
-
 # Allow Python 2.6+ to use the print() function
 from __future__ import print_function
 
@@ -95,25 +93,25 @@ parser.add_argument('--root', type=str, default='', help='Root directory')
 args = parser.parse_args()
 
 # Create directories
-if not os.path.exists(os.path.join(args.root, 'include')):
-    os.makedirs(os.path.join(args.root, 'include'))
+if not os.path.exists(os.path.join(args.root, 'include/GL')):
+    os.makedirs(os.path.join(args.root, 'include/GL'))
 if not os.path.exists(os.path.join(args.root, 'source')):
     os.makedirs(os.path.join(args.root, 'source'))
 
 # Download glcorearb.h
-if not os.path.exists(os.path.join(args.root, 'include/glcorearb.h')):
-    print('Downloading glcorearb.h to {0}...'.format(os.path.join(args.root, 'include/glcorearb.h')))
+if not os.path.exists(os.path.join(args.root, 'include/GL/glcorearb.h')):
+    print('Downloading glcorearb.h to {0}...'.format(os.path.join(args.root, 'include/GL/glcorearb.h')))
     web = urllib2.urlopen('http://www.opengl.org/registry/api/GL/glcorearb.h')
-    with open(os.path.join(args.root, 'include/glcorearb.h'), 'wb') as f:
+    with open(os.path.join(args.root, 'include/GL/glcorearb.h'), 'wb') as f:
         f.writelines(web.readlines())
 else:
-    print('Reusing glcorearb.h from {0}...'.format(os.path.join(args.root, 'include')))
+    print('Reusing glcorearb.h from {0}...'.format(os.path.join(args.root, 'include/GL')))
 
 # Parse function names from glcorearb.h
 print('Parsing glcorearb.h header...')
 procs = []
 p = re.compile(r'GLAPI.*APIENTRY\s+(\w+)')
-with open(os.path.join(args.root, 'include/glcorearb.h'), 'r') as f:
+with open(os.path.join(args.root, 'include/GL/glcorearb.h'), 'r') as f:
     for line in f:
         m = p.match(line)
         if not m:
@@ -124,8 +122,8 @@ with open(os.path.join(args.root, 'include/glcorearb.h'), 'r') as f:
 procs.sort()
 
 # Generate gl3w.h
-print('Generating gl3w.h in {0}...'.format(os.path.join(args.root, 'include')))
-with open(os.path.join(args.root, 'include/gl3w.h'), 'wb') as f:
+print('Generating gl3w.h in {0}...'.format(os.path.join(args.root, 'include/GL')))
+with open(os.path.join(args.root, 'include/GL/gl3w.h'), 'wb') as f:
     write(f, UNLICENSE)
     write(f, r'''#ifndef __gl3w_h_
 #define __gl3w_h_

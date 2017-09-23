@@ -41,3 +41,7 @@ build/*
 
 # Exectable
 Generic-Music-Jam_Game-337
+
+# gl3w generated files
+source/gl3w.c
+include/GL/*
