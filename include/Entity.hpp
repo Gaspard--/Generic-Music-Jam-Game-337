@@ -1,7 +1,6 @@
 #ifndef ENTITY_HPP
 # define ENTITY_HPP
 
-# include <Tuple>
 # include "Surface.hpp"
 
 constexpr Vect<2u, double> complexProduct(Vect<2u, double> a, Vect<2u, double> b)
@@ -32,22 +31,35 @@ public:
   }
 
 #define ENTITY_DIRECTION_GETTER(DIR, NAME) \
-Surface<DIR> get##NAME() const \
-{ \
-  return get<DIR>(); \
-}
+  Surface<DIR> get##NAME() const \
+  { \
+    return get<DIR>(); \
+  }
 
-ENTITY_DIRECTION_GETTER(0u, Right);
-ENTITY_DIRECTION_GETTER(1u, Up);
-ENTITY_DIRECTION_GETTER(2u, Left);
-ENTITY_DIRECTION_GETTER(3u, Down);
+  template<std::size_t DIR>
+  bool hasCollision(const Surface<DIR> &surface) const
+  {
+    auto rotatedSurface(surface.rotate<2>());
+    auto rotatedSelf(get<(DIR + 2) & 3>().rotate<0>());
+    auto rotatedSpeed(complexProduct(getDir((4 + 2 - DIR) & 3), speed));
+
+    if (rotatedSpeed.x <= 0.0)
+      return false;
+    rotatedSelf.pos[1] += (rotatedSpeed.y * (rotatedSurface.x - rotatedSelf.x) / rotatedSpeed.x);
+    return ((rotatedSelf.pos[0] + rotatedSelf.size - rotatedSurface.pos[0]) *
+      (rotatedSurface.pos[0] + rotatedSurface.size - rotatedSelf.pos[0]) < 0);
+  }
+
+  ENTITY_DIRECTION_GETTER(0u, Right);
+  ENTITY_DIRECTION_GETTER(1u, Up);
+  ENTITY_DIRECTION_GETTER(2u, Left);
+  ENTITY_DIRECTION_GETTER(3u, Down);
 
 public:
   bool isUseless;
   Vect<2, double> pos;
   Vect<2, double> size;
   Vect<2, double> speed;
-  std::tuple<Surface<0u>, Surface<1u>, Surface<2u>, Surface<3u>> surfaces;
 };
 
 #endif // !ENTITY_HPP
