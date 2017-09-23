@@ -3,19 +3,23 @@
 
 # include "Vect.hpp"
 
-class SurfaceData
+struct SurfaceData
 {
-public:
   Vect<2u, double> pos;
   double size;
 };
 
-template<size_t direction>
-class Surface : public SurfaceData
+template<std::size_t DIR>
+struct Surface : public SurfaceData
 {
-public:
   Surface(Vect<2u, double>, double);
   ~Surface();
+
+  template<std::size_t DIR2>
+  constexpr Surface<DIR2> rotate() const
+  {
+    return {complexProduct(getDir<(DIR2 + 4 - DIR) & 3>(), pos), size}
+  }
 };
 
 #endif // !SURFACE_HPP
