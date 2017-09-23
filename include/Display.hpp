@@ -46,6 +46,9 @@ class Display : GlfwInit
 	RenderContext rectContext;
 	glBuffer rectBuffer;
 
+	RenderContext textureContext;
+	glBuffer textureBuffer;
+
 	Vect<2, float> dim;
 	Vect<2, float> size;
 
@@ -68,6 +71,7 @@ public:
 				return (window);
 			}())
 		, rectContext(contextFromFiles("rect"))
+		, textureContext(contextFromFiles("texture"))
 	{
 		static auto setFrameBuffer = [this] (float w, float h) {
 			size = { w, h };
