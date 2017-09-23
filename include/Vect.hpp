@@ -1,6 +1,7 @@
 #ifndef VECT_HPP
 # define VECT_HPP
 
+# include <utility>
 # include <type_traits>
 # include <math.h>
 
@@ -92,7 +93,7 @@ public:
   };									\
 									\
   template<class U>							\
-  constexpr auto operator OP(Vect<dim, U> const &other)			\
+  constexpr auto operator OP(Vect<dim, U> const &other) const		\
   {									\
     Vect<dim, decltype(data[0] OP other[0])> result{*this};		\
 									\
@@ -109,7 +110,7 @@ public:
   };									\
 									\
   template<class U>							\
-  constexpr auto operator OP(U const &other)				\
+  constexpr auto operator OP(U const &other) const			\
   {									\
     Vect<dim, decltype(data[0] OP other)> result{*this};		\
 									\
