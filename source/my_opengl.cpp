@@ -10,7 +10,7 @@ void my_opengl::shaderError(GLenum const shadertype, GLuint const shader)
   GLint	len;
 
   glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
-  std::unique_ptr<GLchar[]> log(new GLchar[len + 1]);
+  std::unique_ptr<GLchar[]> log(new GLchar[len + 2]);
 
   log[len + 1] = 0; // safety
   glGetShaderInfoLog(shader, len, nullptr, &log[0]);
