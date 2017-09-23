@@ -5,41 +5,13 @@
 
 # include <iostream> /* DEBUG */
 
-class Logic
+struct Logic
 {
-	std::mutex mutex;
+	constexpr Logic() {}
+	~Logic() {}
 
-	std::mutex exit_mutex;
-	bool exit_bool;
-
-public:
-	Logic();
-	~Logic();
-
-	void run(void) {
-		while ([this]() {
-			std::unique_lock<std::mutex> lg(exit_mutex);
-			return (!exit_bool);
-		}()) {
-		}
-	}
-
-	std::unique_lock<std::mutex> lock(void) {
-		std::unique_lock<std::mutex> lg(mutex);
-		return lg;
-	}
-
-	void pause(void) {
-		mutex.lock();
-	}
-
-	void unpause(void) {
-		mutex.unlock();
-	}
-
-	void exit(void) {
-		std::unique_lock<std::mutex> lg(exit_mutex);
-		exit_bool = true;
+	void tick(void) {
+		std::cout << "tick!" << std::endl;
 	}
 };
 
